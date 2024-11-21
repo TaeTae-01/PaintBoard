@@ -11,10 +11,17 @@ let isDrawing = false;
 let isErasing = false;
 
 // canvas 기본 세팅
-canvas.width = 800;
-canvas.height = 600;
-ctx.strokeStyle = '#2c2c2c';
-ctx.lineWidth = 2.5;
+function setCanvasSize() {
+    canvas.width = window.innerWidth * 0.9;
+    canvas.height = window.innerHeight * 0.9;
+
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+setCanvasSize();
+window.addEventListener("resize", setCanvasSize);
+
 
 // 마우스 이벤트 핸들러
 function startDrawing() {
