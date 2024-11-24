@@ -133,8 +133,7 @@ clear.addEventListener('click', eraseAll);
 
 // 업로드 관련 함수
 uploadBtn.addEventListener("click", async () => {
-    const data = new FormData();
-    data.append("file", canvas.toDataURL("image/png"));
+    const dataURL = canvas.toDataURL("image/png");
 
     const loadingSpinner = document.getElementById("loading-spinner");
     loadingSpinner.style.display = "block";
@@ -142,7 +141,10 @@ uploadBtn.addEventListener("click", async () => {
     try {
         const response = await fetch('http://localhost:5000/api/upload', {
             method: 'POST',
-            body: data,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ image: dataURL }),
         });
 
         if (!response.ok) {
@@ -152,6 +154,14 @@ uploadBtn.addEventListener("click", async () => {
         const result = await response.json();
         console.log("Upload successful:", result);
         displaySuccessMessage("Image uploaded successfully!");
+
+        // 업로드된 이미지 링크 추가
+        const messageContainer = document.getElementById("message-container");
+        const link = document.createElement('a');
+        link.href = `http://localhost:5000/uploads/${result.filename}`;
+        link.textContent = "Click here to view your uploaded image";
+        link.target = "_blank"; // 새 창에서 열기
+        messageContainer.appendChild(link);
     } catch (error) {
         console.error("Upload failed:", error);
         displayErrorMessage("Failed to upload image. Please try again later.");
