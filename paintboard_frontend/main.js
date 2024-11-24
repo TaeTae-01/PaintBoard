@@ -11,19 +11,19 @@ const uploadBtn = document.getElementById("uploadBtn");
 let isDrawing = false;
 let isErasing = false;
 
-// canvas 기본 세팅
+// canvas 기본 세팅 (CSS에서 크기 설정을 제거하고 JS로만 설정)
 function setCanvasSize() {
     // 최소 사이즈
     const MIN_WIDTH = 400;
     const MIN_HEIGHT = 300; 
 
     let newWidth = window.innerWidth * 0.9;
-    let newHeight = window.innerHeight * 0.9;
+    let newHeight = window.innerHeight * 0.75;
 
-    if(newWidth < MIN_WIDTH) {
+    if (newWidth < MIN_WIDTH) {
         newWidth = MIN_WIDTH;
     }
-    if(newHeight < MIN_WIDTH) {
+    if (newHeight < MIN_HEIGHT) {
         newHeight = MIN_HEIGHT;
     }
 
@@ -37,22 +37,27 @@ function setCanvasSize() {
 setCanvasSize();
 window.addEventListener("resize", setCanvasSize);
 
-
 // 마우스 이벤트 핸들러
-function startDrawing() {
+function startDrawing(event) {
     isDrawing = true;
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    ctx.beginPath();
+    ctx.moveTo(x, y);
 }
 
 function draw(event) {
     if (!isDrawing) return;
 
-    const x = event.offsetX;
-    const y = event.offsetY;
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
 
     ctx.lineTo(x, y);
     ctx.stroke();
 }
-
 
 function stopDrawing() {
     isDrawing = false;
@@ -68,7 +73,7 @@ canvas.addEventListener('mouseleave', stopDrawing);
 // 색상 변경 핸들러
 function changeColor(color) {
     ctx.strokeStyle = color;
-    isErasing = false; // 지우개 해제
+    isErasing = false;
     eraser.classList.remove('active');
 }
 
@@ -109,11 +114,11 @@ lineWidthInput.addEventListener("input", function (event) {
 function toggleEraser() {
     isErasing = !isErasing;
     if (isErasing) {
-        ctx.strokeStyle = '#FFFFFF'; // 흰색으로 설정하여 지우개처럼 작동
-        eraser.classList.add('active'); // 버튼에 활성화 클래스 추가
+        ctx.strokeStyle = '#FFFFFF';
+        eraser.classList.add('active');
     } else {
-        ctx.strokeStyle = colorInput.value; // 다시 현재 선택된 색으로 복귀
-        eraser.classList.remove('active'); // 활성화 클래스 제거
+        ctx.strokeStyle = colorInput.value;
+        eraser.classList.remove('active');
     }
 }
 
@@ -121,72 +126,59 @@ eraser.addEventListener('click', toggleEraser);
 
 // 전체 지우기 기능 핸들러
 function eraseAll() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // 캔버스 전체 지우기
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 clear.addEventListener('click', eraseAll);
 
 // 업로드 관련 함수
-uploadBtn.addEventListener("click", () => {
-    const dataURL = canvas.toDataURL(); // 캔버스의 그림을 DataURL 형식으로 변환
-    fetch('http://localhost:3000/posts/upload', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ image: dataURL })
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log('Upload successful', data);
-    })
-    .catch(error => {
-      console.error('Error uploading image:', error);
-    });
-  });
+uploadBtn.addEventListener("click", async () => {
+    const data = new FormData();
+    data.append("file", canvas.toDataURL("image/png"));
 
-  // main.js (프론트엔드)
-
-// 업로드 버튼 클릭 시 이미지 업로드 함수
-async function uploadImage() {
-    const fileInput = document.querySelector("#fileInput");
-    const formData = new FormData();
-    formData.append("image", fileInput.files[0]);
+    const loadingSpinner = document.getElementById("loading-spinner");
+    loadingSpinner.style.display = "block";
 
     try {
-        const response = await fetch('http://localhost:3000/upload', {
+        const response = await fetch('http://localhost:5000/api/upload', {
             method: 'POST',
-            body: formData
+            body: data,
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            // 업로드 성공 메시지를 띄움
-            alert(data.message); // 예: "File uploaded successfully"
-            displaySuccessMessage("Upload successful!");
-        } else {
-            throw new Error('Upload failed');
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
         }
+
+        const result = await response.json();
+        console.log("Upload successful:", result);
+        displaySuccessMessage("Image uploaded successfully!");
     } catch (error) {
-        console.error('Error uploading file:', error);
-        alert('Failed to upload image. Please try again.');
+        console.error("Upload failed:", error);
+        displayErrorMessage("Failed to upload image. Please try again later.");
+    } finally {
+        loadingSpinner.style.display = "none";
     }
-}
+});
 
 // 업로드 성공 메시지 함수
 function displaySuccessMessage(message) {
-    const messageContainer = document.createElement("div");
-    messageContainer.className = "upload-success-message";
-    messageContainer.innerText = message;
+    const messageContainer = document.getElementById("message-container");
+    messageContainer.textContent = message;
+    messageContainer.style.color = "green";
 
-    // 메시지를 body에 추가
-    document.body.appendChild(messageContainer);
-
-    // 3초 후 메시지 제거
+    // 3초 후에 메시지 제거
     setTimeout(() => {
-        document.body.removeChild(messageContainer);
+        messageContainer.textContent = "";
     }, 3000);
 }
 
-// 업로드 버튼 클릭 이벤트 리스너
-document.querySelector("#uploadButton").addEventListener("click", uploadImage);
+function displayErrorMessage(message) {
+    const messageContainer = document.getElementById("message-container");
+    messageContainer.textContent = message;
+    messageContainer.style.color = "red";
+
+    // 3초 후에 메시지 제거
+    setTimeout(() => {
+        messageContainer.textContent = "";
+    }, 3000);
+}
