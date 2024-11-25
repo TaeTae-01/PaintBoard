@@ -11,6 +11,38 @@ body {
 }
 
 /* 도구 모음 스타일 (nav-bar) */
+.navbar {
+    width: 100%;
+    background-color: #333;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
+    color: #fff;
+}
+
+.navbar-container {
+    display: flex;
+    gap: 10px;
+}
+
+.nav-btn {
+    background: none;
+    color: white;
+    border: none;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.nav-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    padding: 5px;
+}
+
+/* 도구 모음 스타일 (toolbar) */
 nav.toolbar {
     width: 100%;
     background-color: #444; 

@@ -4,12 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paint Board</title>
-    <link rel="stylesheet" href="style.css"/>
+    <link rel="stylesheet" href="../css/style.css"/>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>    
 </head>
 <body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <button class="nav-btn" onclick="window.location.href='home.html'">Home 🏠</button>
+            <button class="nav-btn" onclick="window.location.href='paint.html'">그림 그리기 ✒️</button>
+            <button class="nav-btn" onclick="window.location.href='gallery.html'">그림 보러 가기 🖼️</button>
+        </div>
+    </nav>
     <nav class="toolbar">
         <div class="line-width-container">
             <button id="decreaseLineWidth" class="btn btn-outline-light">-</button>
@@ -24,6 +31,6 @@
     <div id="message-container" class="message"></div>
     <div id="loading-spinner" class="spinner" style="display: none;">Loading...</div>
     <canvas></canvas>
-    <script src="main.js"></script>
+    <script src="../js/main.js"></script>
 </body>
 </html>
